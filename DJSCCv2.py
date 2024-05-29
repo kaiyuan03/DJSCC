@@ -1,3 +1,4 @@
+
 import torch
 import torchsummary
 from torch import nn
@@ -94,8 +95,9 @@ class Autoencoder(nn.Module):
         # concatenated symbol power sum: width*height*channel/2, i.e., number of elements/2,
         # i.e., number of elements in in-phase or quadrature compoment
         # average power of each element in in-phrase or quadrature component: 0.5
-        symbols = F.normalize(symbols,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:])/2)
+        symbols = F.normalize(symbols,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
         symbols_corrupted = self.channel(symbols)
+        symbols_corrupted = F.normalize(symbols_corrupted,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
         x_hat = self.decoder(symbols_corrupted)
         return x_hat
     
