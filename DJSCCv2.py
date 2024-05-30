@@ -39,7 +39,8 @@ class Encoder(nn.Module):
         ]))
     def forward(self, x):
         y = self.layers(x)
-        return y
+        symbols = F.normalize(y,dim=(1,2,3))*np.sqrt(np.prod(y.shape[1:]))
+        return symbols
  
 
 class Decoder(nn.Module):
@@ -95,7 +96,7 @@ class Autoencoder(nn.Module):
         # concatenated symbol power sum: width*height*channel/2, i.e., number of elements/2,
         # i.e., number of elements in in-phase or quadrature compoment
         # average power of each element in in-phrase or quadrature component: 0.5
-        symbols = F.normalize(symbols,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
+        # symbols = F.normalize(symbols,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
         symbols_corrupted = self.channel(symbols)
         symbols_corrupted = F.normalize(symbols_corrupted,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
         x_hat = self.decoder(symbols_corrupted)
