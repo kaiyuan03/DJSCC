@@ -2,11 +2,12 @@ import torch
 from torch import nn
 import warnings
 
-def sinr_downlink(W_dict,mode,P,H,p_noise):
+def sinr_downlink(W_dict,mode,P,H,p_noise,disp=0):
     # for mode,W in W_dict.items():
     U = len(P)
     W = W_dict[mode]
-    print("-------------",mode)
+    if disp:
+        print("-------------",mode)
     # compute SINR
     sinr = []
     for u in range(U):
@@ -16,11 +17,15 @@ def sinr_downlink(W_dict,mode,P,H,p_noise):
             if u_ == u:
                 continue
             interference_power += P[u_]*(W[:,u_]@H[:,u])**2
-        print("interference_power: ", interference_power)
+        if disp:
+            print("interference_power: ", interference_power)
         sinr.append(signal_power/(interference_power+p_noise[u]))
-    print("sinr(linear): ", sinr)
-    print("sinr(dB): ", torch.log10(torch.Tensor(sinr)))
-    return sinr
+    if disp:
+        print("sinr(linear): ", sinr)
+    sinr_db = torch.log10(torch.Tensor(sinr))
+    if disp:
+        print("sinr(dB): ", sinr_db)
+    return sinr,sinr_db
 
 # Implement a MU-MISO channel layer
 class CHN_MU_MISO(nn.Module):

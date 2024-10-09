@@ -39,7 +39,7 @@ class Encoder(nn.Module):
         ]))
     def forward(self, x):
         y = self.layers(x)
-        symbols = F.normalize(y,dim=(1,2,3))*np.sqrt(np.prod(y.shape[1:]))
+        symbols = F.normalize(y,dim=(1,2,3)) * np.sqrt(np.prod(y.shape[1:]))
         return symbols
  
 
@@ -87,18 +87,19 @@ class Autoencoder(nn.Module):
         print("Number of feature map: ", num_featuremap)
         self.encoder = Encoder(num_featuremap)
         self.decoder = Decoder(num_featuremap)
-        stddev = 10 ** (-snr_db/20) # noise standard deviation of in-phase and quadrature compoments
+        snr_linear = 10**(snr_db/10)
+        sig_power = 2 # signal power is 2 since both the real and imaginary part have power 1
+        cplx_noise_power = sig_power/snr_linear
+        real_noise_power = cplx_noise_power/2
+        real_noise_stddev = real_noise_power**0.5
+        # stddev = 10 ** (-snr_db/20) # noise standard deviation of in-phase and quadrature compoments
         # precondition: symbol mean power 1
-        self.channel = NormalizationNoise(stddev)
+        self.channel = NormalizationNoise(real_noise_stddev)
         self.trained_epoch = 0
     def forward(self, x):
         symbols = self.encoder(x)
-        # concatenated symbol power sum: width*height*channel/2, i.e., number of elements/2,
-        # i.e., number of elements in in-phase or quadrature compoment
-        # average power of each element in in-phrase or quadrature component: 0.5
-        # symbols = F.normalize(symbols,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
+        # average power of each element in in-phrase or quadrature component: 1
         symbols_corrupted = self.channel(symbols)
-        symbols_corrupted = F.normalize(symbols_corrupted,dim=(1,2,3))*np.sqrt(np.prod(symbols.shape[1:]))
         x_hat = self.decoder(symbols_corrupted)
         return x_hat
     
@@ -123,8 +124,8 @@ class Autoencoder(nn.Module):
 
 def timepref():
     return time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
-def loss(x,y):
-    return torch.mean((x-y)**2)
+# def loss(x,y):
+#     return torch.mean((x-y)**2)
 def train_one_epoch(model, loader, loss_func, optimizer, epochinfo):
     model.train()
     device = next(model.parameters()).device

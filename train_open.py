@@ -6,38 +6,37 @@ import time
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from functions import Imageset,timepref,setup_seed
-from DJSCC import Autoencoder,train_one_epoch,test_one_epoch,loss
+from DJSCCv2 import Autoencoder,train_one_epoch,test_one_epoch#,loss
 ws_root = '/data1/kaiyuan/project/djscc_bcm/'
-snrdb_train=10
-bwrs=[0.02,0.045,0.0625,0.095,0.12]
-dev='cuda:5'
-bwr=bwrs[0]
+# snrdb_train=20
+# bwrs=[0.025431315104166668, 0.03814697265625, 0.050862630208333336, 0.0762939453125, 0.10172526041666667]
+# snrdbs_train = [2,5,7,10,12]
+snrdb_train = 26.859190196177387
+
+dev='cuda:7'
+bwr = 0.01
 
 dev='cuda:6'
-bwr=bwrs[1]
+bwr = 0.02
 
-dev='cuda:7'
-bwr=bwrs[2]
 
-dev='cuda:4'
-bwr=bwrs[3]
-
-dev='cuda:7'
-bwr=bwrs[4]
-
-epoch_num=30
+epoch_num=100
 istest=0
 transform = transforms.Compose([transforms.RandomCrop((256,256))])
+# transform = transforms.Compose([transforms.Resize((256,256))])
 droot = '/data1/kaiyuan/project/compress_lip/Jianhao_datasets/Image/'
+# droot = '/data1/kaiyuan/project/compress_lip/Tuning_Model/Data/bird_split_resized/'
 xtrain = Imageset(droot+'train/data/',transform,istest)
 xtest = Imageset(droot+'test/data/',transform,istest)
-dltrain = DataLoader(xtrain,batch_size=64)
-dltest = DataLoader(xtest,batch_size=128)
+dltrain = DataLoader(xtrain,batch_size=64,num_workers=64)
+dltest = DataLoader(xtest,batch_size=128,num_workers=64)
 model = Autoencoder(snrdb_train,bwr,(3,256,256)).to(dev)
 bestloss=torch.inf
 trainpsnr_ls = []
 testpsnr_ls = []
 optimizer = torch.optim.Adam(model.parameters(),lr=1e-4)
+# loss = loss.to(dev)
+loss = torch.nn.MSELoss()
 for epoch in tqdm.trange(epoch_num):
     print(f"Training epoch: {epoch+1}/{epoch_num}")
     trainpsnr_ls += train_one_epoch(model,dltrain,loss,optimizer,(epoch,epoch_num))

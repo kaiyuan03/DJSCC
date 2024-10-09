@@ -40,19 +40,31 @@ def eval_model(modelpath, test_snrdb,droot,fnames,dev,info):
         ssimls.append(ssim.item())
         psnrls.append(psnr)
     return msels, ssimls, psnrls
-channel = 10
-dev='cuda:5'
+channel = 1
+dev='cuda:6'
+print("device: ", dev)
 modelnames = [
             #   'model_snrdb_10_bwr_0.020_2024_01_21_16_36_54.pth.tar',
             #   'model_snrdb_10_bwr_0.045_2024_01_21_16_43_30.pth.tar',
             #   'model_snrdb_10_bwr_0.062_2024_01_21_16_58_29.pth.tar',
-              'model_snrdb_10_bwr_0.095_2024_01_21_14_41_27.pth.tar',
+            #   'model_snrdb_10_bwr_0.095_2024_01_21_14_41_27.pth.tar',
             #   'model_snrdb_10_bwr_0.120_2024_01_23_02_38_04.pth.tar',
+            # 'model_snrdb_10_bwr_0.051_2024_06_28_06_33_22.pth.tar',
+            # 'model_snrdb_20_bwr_0.051_2024_06_29_00_58_38.pth.tar'
+            # D2JSCC SNR_train match SNR_test
+            'model_snrdb_2_bwr_0.062_2024_08_21_07_06_29.pth.tar',
+            'model_snrdb_5_bwr_0.062_2024_08_21_07_03_40.pth.tar',
+            'model_snrdb_7_bwr_0.062_2024_08_21_03_57_23.pth.tar',
+            'model_snrdb_10_bwr_0.062_2024_01_21_16_58_29.pth.tar',
+            'model_snrdb_12_bwr_0.062_2024_08_21_06_59_49.pth.tar',
               ]
 test_snrdbs = [2,5,7,10,12]
-test_snrdbs = [12]
-dataset = 'Kodak'
+# test_snrdbs = [2]
+# test_snrdbs = [5]
+
+
 dataset = 'CLIC'
+# dataset = 'Kodak'
 droot = '../compress_lip/Jianhao_datasets/'+dataset+'/'
 fnames = os.listdir(droot)*channel
 
